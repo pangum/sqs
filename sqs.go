@@ -7,13 +7,12 @@ import (
 	`github.com/aws/aws-sdk-go-v2/aws`
 	`github.com/aws/aws-sdk-go-v2/credentials`
 	`github.com/aws/aws-sdk-go-v2/service/sqs`
-	`github.com/rs/xid`
 	`github.com/storezhang/pangu`
 )
 
-func newSqs(config *pangu.Config) (client *Client, err error) {
+func newSqs(conf *pangu.Config) (client *Client, err error) {
 	panguConfig := new(panguConfig)
-	if err = config.Load(panguConfig); nil != err {
+	if err = conf.Load(panguConfig); nil != err {
 		return
 	}
 
@@ -31,9 +30,13 @@ func newSqs(config *pangu.Config) (client *Client, err error) {
 	}
 
 	options := sqs.Options{
-		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(accessKey, secretKey, xid.New().String())),
-		Logger:      nil,
-		Region:      region,
+		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
+			accessKey,
+			secretKey,
+			panguConfig.Aws.Sqs.Session,
+		)),
+		// Logger: nil,
+		Region: region,
 	}
 	sqsClient := sqs.New(options)
 	// 获取连接地址

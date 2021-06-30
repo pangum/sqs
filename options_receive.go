@@ -5,7 +5,8 @@ import (
 )
 
 type optionsReceive struct {
-	queueUrl              string
+	optionsBase
+
 	waitTimeSeconds       int32
 	visibilityTimeout     int32
 	maxNumberOfMessages   int32
@@ -15,7 +16,9 @@ type optionsReceive struct {
 
 func defaultOptionsReceive(url string, waitTimeSeconds int32) *optionsReceive {
 	return &optionsReceive{
-		queueUrl:            url,
+		optionsBase: optionsBase{
+			url: url,
+		},
 		waitTimeSeconds:     waitTimeSeconds,
 		maxNumberOfMessages: 1,
 	}

@@ -5,7 +5,8 @@ import (
 )
 
 type optionsSend struct {
-	queueUrl                string
+	optionsBase
+
 	delaySeconds            int32
 	messageAttributes       map[string]types.MessageAttributeValue
 	messageSystemAttributes map[string]types.MessageSystemAttributeValue
@@ -13,6 +14,8 @@ type optionsSend struct {
 
 func defaultOptionsSend(url string) *optionsSend {
 	return &optionsSend{
-		queueUrl: url,
+		optionsBase: optionsBase{
+			url: url,
+		},
 	}
 }

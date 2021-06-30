@@ -24,11 +24,11 @@ func (c *Client) Send(ctx context.Context, body string, opts ...optionSend) (out
 	var rsp *sqs.SendMessageOutput
 	if rsp, err = c.client.SendMessage(ctx, &sqs.SendMessageInput{
 		MessageBody:             &body,
-		QueueUrl:                &options.queueUrl,
+		QueueUrl:                &options.url,
 		DelaySeconds:            options.delaySeconds,
 		MessageAttributes:       options.messageAttributes,
 		MessageSystemAttributes: options.messageSystemAttributes,
-	}); nil != err {
+	}, options.fns...); nil != err {
 		return
 	}
 	output = &SendOutput{SendMessageOutput: rsp}
@@ -44,13 +44,13 @@ func (c *Client) Receive(ctx context.Context, opts ...optionReceive) (output *Re
 
 	var rsp *sqs.ReceiveMessageOutput
 	if rsp, err = c.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-		QueueUrl:              &options.queueUrl,
+		QueueUrl:              &options.url,
 		AttributeNames:        options.attributeNames,
 		MaxNumberOfMessages:   0,
 		MessageAttributeNames: options.messageAttributeNames,
 		VisibilityTimeout:     options.visibilityTimeout,
 		WaitTimeSeconds:       options.waitTimeSeconds,
-	}); nil != err {
+	}, options.fns...); nil != err {
 		return
 	}
 	output = &ReceiveOutput{ReceiveMessageOutput: rsp}
@@ -67,22 +67,22 @@ func (c *Client) HandleReceive(ctx context.Context, handler Handler, opts ...opt
 	var rsp *sqs.ReceiveMessageOutput
 	for ; ; {
 		if rsp, err = c.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-			QueueUrl:              &options.queueUrl,
+			QueueUrl:              &options.url,
 			AttributeNames:        options.attributeNames,
 			MaxNumberOfMessages:   1,
 			MessageAttributeNames: options.messageAttributeNames,
 			VisibilityTimeout:     options.visibilityTimeout,
 			WaitTimeSeconds:       options.waitTimeSeconds,
-		}); nil != err {
+		}, options.fns...); nil != err {
 			return
 		}
 
-		if 1 == len(rsp.Messages) {
+		if 1 != len(rsp.Messages) {
 			continue
 		}
 
 		// 并行消费，加快消费速度
-		go c.handleReceive(ctx, &options.queueUrl, handler, rsp.Messages[0])
+		go c.handleReceive(ctx, &options.url, handler, rsp.Messages[0])
 	}
 }
 
