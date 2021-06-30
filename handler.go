@@ -1,5 +1,7 @@
 package sqs
 
+// Handler 消费处理器
 type Handler interface {
-	OnMessage() (err error)
+	// OnMessage 处理消息
+	OnMessage(message *Message) (status ConsumeStatus, err error)
 }

@@ -7,6 +7,7 @@ import (
 	`github.com/aws/aws-sdk-go-v2/aws`
 	`github.com/aws/aws-sdk-go-v2/credentials`
 	`github.com/aws/aws-sdk-go-v2/service/sqs`
+	`github.com/rs/xid`
 	`github.com/storezhang/pangu`
 )
 
@@ -30,7 +31,7 @@ func newSqs(config *pangu.Config) (client *Client, err error) {
 	}
 
 	options := sqs.Options{
-		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(accessKey, secretKey)),
+		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(accessKey, secretKey, xid.New().String())),
 		Logger:      nil,
 		Region:      region,
 	}
@@ -42,9 +43,13 @@ func newSqs(config *pangu.Config) (client *Client, err error) {
 	}); nil != err {
 		return
 	}
+
+	// 创建客户端
 	client = &Client{
-		client:   sqsClient,
-		queueUrl: *urlRsp.QueueUrl,
+		client: sqsClient,
+
+		queueUrl:        *urlRsp.QueueUrl,
+		waitTimeSeconds: int32(panguConfig.Aws.Sqs.Wait),
 	}
 
 	return
