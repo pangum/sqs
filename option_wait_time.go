@@ -10,6 +10,7 @@ type optionWaitTime struct {
 	waitTimeSeconds time.Duration
 }
 
+// WaitTime 配置拉取消息最大等待时间
 func WaitTime(waitTime time.Duration) *optionWaitTime {
 	return &optionWaitTime{waitTimeSeconds: waitTime}
 }

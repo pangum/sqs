@@ -10,6 +10,7 @@ type optionAttributes struct {
 	attributes map[string]types.MessageAttributeValue
 }
 
+// Attributes 配置消息属性
 func Attributes(attributes map[string]types.MessageAttributeValue) *optionAttributes {
 	return &optionAttributes{attributes: attributes}
 }

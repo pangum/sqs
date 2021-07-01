@@ -10,6 +10,7 @@ type optionVisibilityTimeout struct {
 	visibilityTimeout time.Duration
 }
 
+// VisibilityTimeout 配置消息可见性
 func VisibilityTimeout(visibilityTimeout time.Duration) *optionVisibilityTimeout {
 	return &optionVisibilityTimeout{visibilityTimeout: visibilityTimeout}
 }

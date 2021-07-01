@@ -9,6 +9,7 @@ type optionQueueUrl struct {
 	url string
 }
 
+// QueueUrl 配置队列地址
 func QueueUrl(url string) *optionQueueUrl {
 	return &optionQueueUrl{url: url}
 }

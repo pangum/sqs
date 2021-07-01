@@ -10,6 +10,7 @@ type optionDelay struct {
 	delay time.Duration
 }
 
+// Delay 配置延迟
 func Delay(delay time.Duration) *optionDelay {
 	return &optionDelay{delay: delay}
 }

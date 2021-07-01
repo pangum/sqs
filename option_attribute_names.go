@@ -10,6 +10,7 @@ type optionAttributeNames struct {
 	attributeNames []types.QueueAttributeName
 }
 
+// AttributeNames 配置系统属性
 func AttributeNames(names ...types.QueueAttributeName) *optionAttributeNames {
 	return &optionAttributeNames{attributeNames: names}
 }

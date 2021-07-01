@@ -13,6 +13,7 @@ type optionOptFns struct {
 	fns []func(*sqs.Options)
 }
 
+// OptFns 配置Sqs配置重写
 func OptFns(fns ...func(*Options)) *optionOptFns {
 	sqsFns := make([]func(options *sqs.Options), 0, len(fns))
 	for _, fn := range fns {

@@ -10,6 +10,7 @@ type optionSystemAttributes struct {
 	attributes map[string]types.MessageSystemAttributeValue
 }
 
+// SystemAttributes 配置系统属性列表
 func SystemAttributes(attributes map[string]types.MessageSystemAttributeValue) *optionSystemAttributes {
 	return &optionSystemAttributes{attributes: attributes}
 }
