@@ -7,14 +7,14 @@ import (
 var _ optionSend = (*optionDelay)(nil)
 
 type optionDelay struct {
-	delay time.Duration
+	delay int32
 }
 
 // Delay 配置延迟
 func Delay(delay time.Duration) *optionDelay {
-	return &optionDelay{delay: delay}
+	return &optionDelay{delay: int32(delay / time.Second)}
 }
 
 func (wts *optionDelay) applySend(options *optionsSend) {
-	options.delaySeconds = int32(wts.delay)
+	options.delaySeconds = wts.delay
 }

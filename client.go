@@ -3,9 +3,12 @@ package sqs
 import (
 	`context`
 	`sync`
+	`time`
 
 	`github.com/aws/aws-sdk-go-v2/service/sqs`
 	`github.com/aws/aws-sdk-go-v2/service/sqs/types`
+	`github.com/storezhang/glog`
+	`github.com/storezhang/gox/field`
 )
 
 // Client Sqs客户端封装
@@ -16,6 +19,7 @@ type Client struct {
 	queueMap        map[string]*string
 	waitTimeSeconds int32
 	_queueUrlCache  sync.Map
+	logger          glog.Logger
 }
 
 func (c *Client) Url(ctx context.Context, label string) (url *string, err error) {
@@ -120,17 +124,37 @@ func (c *Client) HandleReceive(ctx context.Context, handler Handler, opts ...opt
 		}
 
 		// 并行消费，加快消费速度
-		go c.handleReceive(ctx, url, handler, rsp.Messages[0])
+		go c.handleReceive(ctx, url, handler, rsp.Messages[0], options)
 	}
 }
 
-func (c *Client) handleReceive(ctx context.Context, url *string, handler Handler, message types.Message) {
+func (c *Client) handleReceive(ctx context.Context, url *string, handler Handler, message types.Message, options *optionsReceive) {
 	var (
 		status ConsumeStatus
 		err    error
 	)
 
-	if status, err = handler.OnMessage(withConsumeContext(ctx), &Message{Message: message}); nil != err {
+	// 重试
+	for times := 0; times < options.maxRetry; times++ {
+		if status, err = handler.OnMessage(withConsumeContext(ctx), &Message{Message: message}); nil == err {
+			break
+		} else {
+			c.logger.Warn("消费出错，重试", field.Stringp("messageId", message.MessageId), field.Int("times", times))
+			time.Sleep(options.retryDuration)
+		}
+	}
+	if nil != err {
+		_, err = c.client.ChangeMessageVisibility(ctx, &sqs.ChangeMessageVisibilityInput{
+			QueueUrl:          url,
+			ReceiptHandle:     message.ReceiptHandle,
+			VisibilityTimeout: int32(options.retryDuration),
+		})
+		c.logger.Warn(
+			"达到最大重试次数，消费仍然出错，改变消息可见性等待下一次消费",
+			field.Stringp("messageId", message.MessageId),
+			field.Duration("visibility", options.retryDuration),
+		)
+
 		return
 	}
 
@@ -150,7 +174,7 @@ func (c *Client) handleReceive(ctx context.Context, url *string, handler Handler
 		_, err = c.client.ChangeMessageVisibility(ctx, &sqs.ChangeMessageVisibilityInput{
 			QueueUrl:          url,
 			ReceiptHandle:     message.ReceiptHandle,
-			VisibilityTimeout: 0,
+			VisibilityTimeout: int32(time.Second),
 		})
 	}
 }

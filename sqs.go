@@ -7,10 +7,11 @@ import (
 	`github.com/aws/aws-sdk-go-v2/aws`
 	`github.com/aws/aws-sdk-go-v2/credentials`
 	`github.com/aws/aws-sdk-go-v2/service/sqs`
+	`github.com/storezhang/glog`
 	`github.com/storezhang/pangu`
 )
 
-func newSqs(conf *pangu.Config) (client *Client, err error) {
+func newSqs(conf *pangu.Config, logger glog.Logger) (client *Client, err error) {
 	panguConfig := new(panguConfig)
 	if err = conf.Load(panguConfig); nil != err {
 		return
@@ -29,30 +30,41 @@ func newSqs(conf *pangu.Config) (client *Client, err error) {
 		return
 	}
 
+	sqsConfig := panguConfig.Aws.Sqs
 	options := sqs.Options{
 		Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
 			accessKey,
 			secretKey,
-			panguConfig.Aws.Sqs.Session,
+			sqsConfig.Session,
 		)),
 		// Logger: nil,
 		Region: region,
 	}
 
 	sqsClient := sqs.New(options)
-	queues := panguConfig.Aws.Sqs.Queues
+	queues := sqsConfig.Queues
 	queueMap := make(map[string]*string, len(queues))
-	for _, queue := range queues {
-		queueMap[queue.Label] = &queue.Name
+	for _, _queue := range queues {
+		_queue := _queue
+		queueMap[_queue.Label] = &_queue.Name
 	}
+	if "" != sqsConfig.Queue {
+		queueMap[sqsConfig.Queue] = &sqsConfig.Queue
+	}
+	label := sqsConfig.Queue
+	if "" == label {
+		label = queues[0].Label
+	}
+
 	// 创建客户端
 	client = &Client{
 		client: sqsClient,
 
-		defaultLabel:    queues[0].Label,
+		defaultLabel:    label,
 		queueMap:        queueMap,
-		waitTimeSeconds: int32(panguConfig.Aws.Sqs.Wait),
+		waitTimeSeconds: int32(sqsConfig.Wait),
 		_queueUrlCache:  sync.Map{},
+		logger:          logger,
 	}
 
 	return

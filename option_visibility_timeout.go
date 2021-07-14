@@ -7,12 +7,12 @@ import (
 var _ optionReceive = (*optionVisibilityTimeout)(nil)
 
 type optionVisibilityTimeout struct {
-	visibilityTimeout time.Duration
+	visibilityTimeout int32
 }
 
 // VisibilityTimeout 配置消息可见性
 func VisibilityTimeout(visibilityTimeout time.Duration) *optionVisibilityTimeout {
-	return &optionVisibilityTimeout{visibilityTimeout: visibilityTimeout}
+	return &optionVisibilityTimeout{visibilityTimeout: int32(visibilityTimeout / time.Second)}
 }
 
 func (vt *optionVisibilityTimeout) applyReceive(options *optionsReceive) {
