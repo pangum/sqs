@@ -130,17 +130,27 @@ func (c *Client) handleReceive(ctx context.Context, url *string, handler Handler
 		err    error
 	)
 
-	if status, err = handler.OnMessage(&Message{Message: message}); nil != err {
+	if status, err = handler.OnMessage(withConsumeContext(ctx), &Message{Message: message}); nil != err {
 		return
 	}
 
 	switch status {
 	case ConsumeStatusSuccess: // 消费成功，删除消息，不然会重复消费
-		if _, err = c.client.DeleteMessage(ctx, &sqs.DeleteMessageInput{
+		_, err = c.client.DeleteMessage(ctx, &sqs.DeleteMessageInput{
 			QueueUrl:      url,
 			ReceiptHandle: message.ReceiptHandle,
-		}); nil != err {
-			return
-		}
+		})
+	case ConsumeStatusLater: // 延迟消费，改变消息可见性，使其在指定的时间内再次被消费
+		_, err = c.client.ChangeMessageVisibility(ctx, &sqs.ChangeMessageVisibilityInput{
+			QueueUrl:          url,
+			ReceiptHandle:     message.ReceiptHandle,
+			VisibilityTimeout: int32(delay(ctx)),
+		})
+	case ConsumeStatusUnknown: // 默认状态，改变消息可见性，使前可以立即被消费
+		_, err = c.client.ChangeMessageVisibility(ctx, &sqs.ChangeMessageVisibilityInput{
+			QueueUrl:          url,
+			ReceiptHandle:     message.ReceiptHandle,
+			VisibilityTimeout: 0,
+		})
 	}
 }
