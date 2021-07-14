@@ -14,10 +14,10 @@ type optionsReceive struct {
 	messageAttributeNames []string
 }
 
-func defaultOptionsReceive(url string, waitTimeSeconds int32) *optionsReceive {
+func defaultOptionsReceive(label string, waitTimeSeconds int32) *optionsReceive {
 	return &optionsReceive{
 		optionsBase: optionsBase{
-			url: url,
+			label: label,
 		},
 		waitTimeSeconds:     waitTimeSeconds,
 		maxNumberOfMessages: 1,

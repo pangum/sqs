@@ -1,8 +1,8 @@
 package sqs
 
 import (
-	`context`
 	`errors`
+	`sync`
 
 	`github.com/aws/aws-sdk-go-v2/aws`
 	`github.com/aws/aws-sdk-go-v2/credentials`
@@ -38,21 +38,21 @@ func newSqs(conf *pangu.Config) (client *Client, err error) {
 		// Logger: nil,
 		Region: region,
 	}
-	sqsClient := sqs.New(options)
-	// 获取连接地址
-	var urlRsp *sqs.GetQueueUrlOutput
-	if urlRsp, err = sqsClient.GetQueueUrl(context.TODO(), &sqs.GetQueueUrlInput{
-		QueueName: &panguConfig.Aws.Sqs.Queue,
-	}); nil != err {
-		return
-	}
 
+	sqsClient := sqs.New(options)
+	queues := panguConfig.Aws.Sqs.Queues
+	queueMap := make(map[string]*string, len(queues))
+	for _, queue := range queues {
+		queueMap[queue.Label] = &queue.Name
+	}
 	// 创建客户端
 	client = &Client{
 		client: sqsClient,
 
-		queueUrl:        *urlRsp.QueueUrl,
+		defaultLabel:    queues[0].Label,
+		queueMap:        queueMap,
 		waitTimeSeconds: int32(panguConfig.Aws.Sqs.Wait),
+		_queueUrlCache:  sync.Map{},
 	}
 
 	return

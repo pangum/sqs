@@ -12,10 +12,10 @@ type optionsSend struct {
 	messageSystemAttributes map[string]types.MessageSystemAttributeValue
 }
 
-func defaultOptionsSend(url string) *optionsSend {
+func defaultOptionsSend(label string) *optionsSend {
 	return &optionsSend{
 		optionsBase: optionsBase{
-			url: url,
+			label: label,
 		},
 	}
 }

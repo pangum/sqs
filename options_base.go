@@ -5,6 +5,6 @@ import (
 )
 
 type optionsBase struct {
-	url string
-	fns []func(*sqs.Options)
+	label string
+	fns   []func(*sqs.Options)
 }

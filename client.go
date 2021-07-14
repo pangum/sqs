@@ -2,6 +2,7 @@ package sqs
 
 import (
 	`context`
+	`sync`
 
 	`github.com/aws/aws-sdk-go-v2/service/sqs`
 	`github.com/aws/aws-sdk-go-v2/service/sqs/types`
@@ -11,20 +12,47 @@ import (
 type Client struct {
 	client *sqs.Client
 
-	queueUrl        string
+	defaultLabel    string
+	queueMap        map[string]*string
 	waitTimeSeconds int32
+	_queueUrlCache  sync.Map
+}
+
+func (c *Client) Url(ctx context.Context, label string) (url *string, err error) {
+	if cache, ok := c._queueUrlCache.Load(label); ok {
+		url = cache.(*string)
+	}
+	if nil != url {
+		return
+	}
+
+	var urlRsp *sqs.GetQueueUrlOutput
+	if urlRsp, err = c.client.GetQueueUrl(ctx, &sqs.GetQueueUrlInput{
+		QueueName: c.queueMap[label],
+	}); nil != err {
+		return
+	}
+	url = urlRsp.QueueUrl
+	c._queueUrlCache.Store(label, url)
+
+	return
 }
 
 func (c *Client) Send(ctx context.Context, body string, opts ...optionSend) (output *SendOutput, err error) {
-	options := defaultOptionsSend(c.queueUrl)
+	options := defaultOptionsSend(c.defaultLabel)
 	for _, opt := range opts {
 		opt.applySend(options)
+	}
+
+	var url *string
+	if url, err = c.Url(ctx, options.label); nil != err {
+		return
 	}
 
 	var rsp *sqs.SendMessageOutput
 	if rsp, err = c.client.SendMessage(ctx, &sqs.SendMessageInput{
 		MessageBody:             &body,
-		QueueUrl:                &options.url,
+		QueueUrl:                url,
 		DelaySeconds:            options.delaySeconds,
 		MessageAttributes:       options.messageAttributes,
 		MessageSystemAttributes: options.messageSystemAttributes,
@@ -37,14 +65,19 @@ func (c *Client) Send(ctx context.Context, body string, opts ...optionSend) (out
 }
 
 func (c *Client) Receive(ctx context.Context, opts ...optionReceive) (output *ReceiveOutput, err error) {
-	options := defaultOptionsReceive(c.queueUrl, c.waitTimeSeconds)
+	options := defaultOptionsReceive(c.defaultLabel, c.waitTimeSeconds)
 	for _, opt := range opts {
 		opt.applyReceive(options)
 	}
 
+	var url *string
+	if url, err = c.Url(ctx, options.label); nil != err {
+		return
+	}
+
 	var rsp *sqs.ReceiveMessageOutput
 	if rsp, err = c.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-		QueueUrl:              &options.url,
+		QueueUrl:              url,
 		AttributeNames:        options.attributeNames,
 		MaxNumberOfMessages:   0,
 		MessageAttributeNames: options.messageAttributeNames,
@@ -59,15 +92,20 @@ func (c *Client) Receive(ctx context.Context, opts ...optionReceive) (output *Re
 }
 
 func (c *Client) HandleReceive(ctx context.Context, handler Handler, opts ...optionReceive) (err error) {
-	options := defaultOptionsReceive(c.queueUrl, c.waitTimeSeconds)
+	options := defaultOptionsReceive(c.defaultLabel, c.waitTimeSeconds)
 	for _, opt := range opts {
 		opt.applyReceive(options)
+	}
+
+	var url *string
+	if url, err = c.Url(ctx, options.label); nil != err {
+		return
 	}
 
 	var rsp *sqs.ReceiveMessageOutput
 	for ; ; {
 		if rsp, err = c.client.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
-			QueueUrl:              &options.url,
+			QueueUrl:              url,
 			AttributeNames:        options.attributeNames,
 			MaxNumberOfMessages:   1,
 			MessageAttributeNames: options.messageAttributeNames,
@@ -82,7 +120,7 @@ func (c *Client) HandleReceive(ctx context.Context, handler Handler, opts ...opt
 		}
 
 		// 并行消费，加快消费速度
-		go c.handleReceive(ctx, &options.url, handler, rsp.Messages[0])
+		go c.handleReceive(ctx, url, handler, rsp.Messages[0])
 	}
 }
 
