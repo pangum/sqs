@@ -1,11 +1,9 @@
 package sqs
 
 import (
-	`github.com/storezhang/pangu`
+	"github.com/pangum/pangu"
 )
 
 func init() {
-	if err := pangu.New().Provides(newSqs); nil != err {
-		panic(err)
-	}
+	pangu.New().Dependency(newSqs)
 }

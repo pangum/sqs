@@ -1,6 +1,6 @@
-package sqs
+package config
 
-type queue struct {
+type Queue struct {
 	// 名称
 	Name string `json:"name" yaml:"name" xml:"name" toml:"name" validate:"required"`
 	// 标签
