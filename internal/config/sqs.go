@@ -14,5 +14,5 @@ type Sqs struct {
 	// 队列列表
 	Queues []*Queue `json:"queues" yaml:"queues" xml:"queues" toml:"queues" validate:"required_without=Queue"`
 	// 长轮询，减少费用
-	Wait time.Duration `json:"wait" yaml:"wait" xml:"wait" toml:"wait" validate:"omitempty,max=20000"`
+	Wait time.Duration `default:"20s" json:"wait" yaml:"wait" xml:"wait" toml:"wait" validate:"omitempty,max=20000"`
 }
