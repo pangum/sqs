@@ -2,12 +2,13 @@ package sqs
 
 import (
 	"github.com/goexl/sqs"
+	"github.com/pangum/logging"
 	"github.com/pangum/pangu"
 	"github.com/pangum/sqs/internal/config"
 	"github.com/pangum/sqs/internal/core"
 )
 
-func newSqs(conf *pangu.Config) (client *Client, err error) {
+func newSqs(conf *pangu.Config, logger logging.Logger) (client *Client, err error) {
 	wrapper := new(core.Wrapper)
 	if err = conf.Load(wrapper); nil != err {
 		return
@@ -15,7 +16,7 @@ func newSqs(conf *pangu.Config) (client *Client, err error) {
 
 	aws := wrapper.Aws
 	self := aws.Sqs
-	builder := sqs.New().Region(aws.RealRegion()).Wait(self.Wait)
+	builder := sqs.New().Region(aws.RealRegion()).Wait(self.Wait).Logger(logger)
 
 	// 配置授权
 	credential := aws.RealCredential()
