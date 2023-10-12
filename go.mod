@@ -3,8 +3,8 @@ module github.com/pangum/sqs
 go 1.19
 
 require (
-	github.com/goexl/gox v0.3.6
-	github.com/goexl/sqs v0.0.3
+	github.com/goexl/gox v0.3.7
+	github.com/goexl/sqs v0.0.4
 	github.com/pangum/logging v0.2.0
 	github.com/pangum/pangu v0.3.2
 )
@@ -39,9 +39,8 @@ require (
 	github.com/urfave/cli/v2 v2.25.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zs5460/art v0.3.0 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.24.0 // indirect
+	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
