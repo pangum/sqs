@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/goexl/gox v0.3.8
 	github.com/goexl/log v0.0.5
-	github.com/goexl/sqs v0.0.5
+	github.com/goexl/sqs v0.0.6
 	github.com/pangum/pangu v0.3.9
 )
 
