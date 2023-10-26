@@ -1,20 +1,28 @@
-package sqs
+package plugin
 
 import (
+	"github.com/goexl/log"
 	"github.com/goexl/sqs"
-	"github.com/pangum/logging"
 	"github.com/pangum/pangu"
 	"github.com/pangum/sqs/internal/config"
-	"github.com/pangum/sqs/internal/core"
 )
 
-func newSqs(conf *pangu.Config, logger logging.Logger) (client *Client, err error) {
-	wrapper := new(core.Wrapper)
-	if err = conf.Load(wrapper); nil != err {
-		return
+type Creator struct {
+	// 解决命名空间问题
+}
+
+func (c *Creator) New(config *pangu.Config, logger log.Logger) (client *sqs.Client, err error) {
+	wrapper := new(Wrapper)
+	if ge := config.Build().Get(wrapper); nil != ge {
+		err = ge
+	} else {
+		client, err = c.new(&wrapper.Aws, logger)
 	}
 
-	aws := wrapper.Aws
+	return
+}
+
+func (c *Creator) new(aws *config.Aws, logger log.Logger) (client *sqs.Client, err error) {
 	self := aws.Sqs
 	builder := sqs.New().Region(aws.RealRegion()).Wait(self.Wait).Logger(logger)
 
