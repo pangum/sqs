@@ -1,30 +1,31 @@
 package plugin
 
 import (
+	"github.com/goexl/http"
 	"github.com/goexl/log"
 	"github.com/goexl/sqs"
 	"github.com/pangum/pangu"
 	"github.com/pangum/sqs/internal/config"
 )
 
-type Creator struct {
+type Constructor struct {
 	// 解决命名空间问题
 }
 
-func (c *Creator) New(config *pangu.Config, logger log.Logger) (client *sqs.Client, err error) {
+func (c *Constructor) New(config *pangu.Config, http *http.Client, logger log.Logger) (client *sqs.Client, err error) {
 	wrapper := new(Wrapper)
 	if ge := config.Build().Get(wrapper); nil != ge {
 		err = ge
 	} else {
-		client, err = c.new(&wrapper.Aws, logger)
+		client, err = c.new(&wrapper.Aws, http, logger)
 	}
 
 	return
 }
 
-func (c *Creator) new(aws *config.Aws, logger log.Logger) (client *sqs.Client, err error) {
+func (c *Constructor) new(aws *config.Aws, http *http.Client, logger log.Logger) (client *sqs.Client, err error) {
 	self := aws.Sqs
-	builder := sqs.New().Region(aws.RealRegion()).Wait(self.Wait).Logger(logger)
+	builder := sqs.New().Region(aws.RealRegion()).Wait(self.Wait).Http(http).Logger(logger)
 
 	// 配置授权
 	credential := aws.RealCredential()
