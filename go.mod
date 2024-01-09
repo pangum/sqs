@@ -6,7 +6,7 @@ require (
 	github.com/goexl/gox v0.3.8
 	github.com/goexl/http v0.1.6
 	github.com/goexl/log v0.0.7
-	github.com/goexl/sqs v0.1.3
+	github.com/goexl/sqs v0.1.4
 	github.com/pangum/pangu v0.4.5
 )
 
