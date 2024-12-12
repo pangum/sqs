@@ -5,7 +5,7 @@ toolchain go1.23.4
 
 require (
 	github.com/goexl/gox v1.9.2
-	github.com/goexl/http v0.1.9
+	github.com/goexl/http v0.2.1
 	github.com/goexl/log v0.0.7
 	github.com/goexl/sqs v0.1.4
 	github.com/pangum/pangu v0.4.5
@@ -24,7 +24,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
-	github.com/go-resty/resty/v2 v2.11.0 // indirect
+	github.com/go-resty/resty/v2 v2.15.3 // indirect
 	github.com/goexl/baozheng v0.0.1 // indirect
 	github.com/goexl/env v0.0.2 // indirect
 	github.com/goexl/exception v0.0.1 // indirect
@@ -44,7 +44,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e // indirect
 	github.com/zs5460/art v0.3.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
