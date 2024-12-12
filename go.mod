@@ -1,9 +1,10 @@
 module github.com/pangum/sqs
 
 go 1.21
+toolchain go1.23.4
 
 require (
-	github.com/goexl/gox v0.3.8
+	github.com/goexl/gox v1.9.2
 	github.com/goexl/http v0.1.9
 	github.com/goexl/log v0.0.7
 	github.com/goexl/sqs v0.1.4
