@@ -8,7 +8,7 @@ require (
 	github.com/goexl/http v0.2.1
 	github.com/goexl/log v0.0.9
 	github.com/goexl/sqs v0.1.4
-	github.com/pangum/pangu v1.6.0
+	github.com/pangum/pangu v1.6.3
 )
 
 require (
