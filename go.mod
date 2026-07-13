@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/goexl/gox v1.9.2
-	github.com/goexl/http v0.3.1
+	github.com/goexl/http v0.3.2
 	github.com/goexl/log v0.1.0
 	github.com/goexl/sqs v0.1.4
 	github.com/pangum/pangu v1.6.3
